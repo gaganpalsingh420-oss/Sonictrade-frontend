@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import StockCard from "../components/StockCard";
+import api from "../api";
 
-export default function Stocks() {
-  const [stocks, setStocks] = useState([]);
+export default function Stocks(){
+  const [data, setData] = useState(null);
+  useEffect(()=>{
+    async function load(){
+      try{
+        const res = await api.get("/api/stocks");
+        setData(res.data);
+      }catch(e){
+        console.error("Failed to load stocks", e);
+      }
+    }
+    load();
+  },[]);
 
-  useEffect(() => {
-    axios.get("https://nivesh-yatra-1x38.onrender.com/api/stocks")
-      .then(res => setStocks(res.data))
-      .catch(err => console.error("Error:", err));
-  }, []);
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
-      {stocks.map((s, i) => (
-        <StockCard key={i} stock={s} />
-      ))}
-    </div>
-  );
+  if(!data) return <div>Loading...</div>;
+  return <pre>{JSON.stringify(data, null, 2)}</pre>;
 }
